@@ -1,0 +1,49 @@
+{
+  "name": "wechat-auto-sender",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "rebuild": "electron-rebuild -f -w robotjs,node-window-manager",
+    "dist": "electron-builder",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "node-window-manager": "^2.2.4",
+    "robotjs": "^0.6.0"
+  },
+  "devDependencies": {
+    "electron": "24.8.8",
+    "electron-builder": "^23.6.0",
+    "@electron/rebuild": "^4.0.1"
+  },
+  "build": {
+    "appId": "com.yourcompany.wechatautosender",
+    "productName": "WeChatAutoSender",
+    "directories": {
+      "buildResources": "assets",
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "renderer.js",
+      "index.html",
+      "assets/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "zip"
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "assets/icon.icns"
+    }
+  }
+}

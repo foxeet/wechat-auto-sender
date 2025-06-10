@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>微信运营自动发送助手</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    #add-button {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #007aff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    #add-button:hover {
+      background: #005ecf;
+    }
+    #item-list {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 30px;
+    }
+    .item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #fafafa;
+    }
+    .item .content-preview {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+    .item .content-preview img {
+      max-height: 60px;
+      max-width: 100px;
+      object-fit: cover;
+      margin-right: 10px;
+    }
+    .item .content-preview .text-preview {
+      word-break: break-all;
+    }
+    .item .actions button {
+      margin-left: 8px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .item .actions .edit-btn {
+      background: #ff9800;
+      color: #fff;
+    }
+    .item .actions .delete-btn {
+      background: #e74c3c;
+      color: #fff;
+    }
+    .item .actions .edit-btn:hover {
+      background: #d97f00;
+    }
+    .item .actions .delete-btn:hover {
+      background: #c0392b;
+    }
+    #start-button {
+      width: 100%;
+      padding: 12px;
+      background: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #start-button:hover {
+      background: #218838;
+    }
+    #status-box {
+      margin-top: 20px;
+      padding: 12px;
+      background: #eef;
+      border: 1px solid #99c;
+      border-radius: 4px;
+      display: none;
+    }
+    #status-box p {
+      margin: 6px 0;
+    }
+
+    /* ==== 以下是 dialog 样式 ==== */
+    dialog {
+      border: none;
+      border-radius: 6px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    dialog::backdrop {
+      background: rgba(0,0,0,0.3);
+    }
+    .dialog-buttons {
+      margin-top: 20px;
+      text-align: right;
+    }
+    .dialog-buttons button {
+      margin-left: 10px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .dialog-buttons .confirm-btn {
+      background: #007aff;
+      color: #fff;
+    }
+    .dialog-buttons .cancel-btn {
+      background: #e74c3c;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1>微信运营自动发送助手</h1>
+
+    <!-- 添加内容按钮 -->
+    <button id="add-button">＋ 添加内容</button>
+
+    <!-- 内容列表 -->
+    <ul id="item-list"></ul>
+
+    <!-- 开始执行按钮 -->
+    <button id="start-button">开始执行</button>
+
+    <!-- 状态提示框 -->
+    <div id="status-box">
+      <p id="status-text"></p>
+      <p>请确保微信聊天输入框已打开并已登录，应用将自动切换到微信进行粘贴和发送。</p>
+    </div>
+  </div>
+
+  <!-- ===== 自定义弹窗：让用户先选“文字”或“图片” ===== -->
+  <dialog id="choice-dialog">
+    <p>添加内容：请选择操作</p>
+    <div class="dialog-buttons">
+      <button id="choice-text" class="confirm-btn">添加文字</button>
+      <button id="choice-image" class="confirm-btn">上传图片</button>
+      <button id="choice-cancel" class="cancel-btn">取消</button>
+    </div>
+  </dialog>
+
+  <!-- ===== 自定义弹窗：文本输入 ===== -->
+  <dialog id="text-dialog">
+    <p>请输入要发送的文字内容：</p>
+    <textarea id="text-input" rows="4" style="width:100%;"></textarea>
+    <div class="dialog-buttons">
+      <button id="text-confirm" class="confirm-btn">确认</button>
+      <button id="text-cancel" class="cancel-btn">取消</button>
+    </div>
+  </dialog>
+
+  <!-- ===== 自定义弹窗：删除确认（可选） ===== -->
+  <dialog id="confirm-dialog">
+    <p id="confirm-message">确认要删除这条内容吗？</p>
+    <div class="dialog-buttons">
+      <button id="confirm-ok" class="confirm-btn">确认</button>
+      <button id="confirm-no" class="cancel-btn">取消</button>
+    </div>
+  </dialog>
+
+  <!-- 必须放在 body 末尾，确保 DOM 都加载后才执行 -->
+  <script src="renderer.js"></script>
+</body>
+</html>
