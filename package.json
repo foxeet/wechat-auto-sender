@@ -1,0 +1,64 @@
+{
+  "name": "wechat-auto-sender",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "rebuild": "electron-rebuild -f -w robotjs,node-window-manager",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "node-window-manager": "^2.2.4",
+    "robotjs": "^0.6.0"
+  },
+  "devDependencies": {
+    "electron": "24.8.8",
+    "electron-builder": "^23.6.0",
+    "@electron/rebuild": "^4.0.1"
+  },
+  "build": {
+    "appId": "com.shiflow.operationassistant",
+    "productName": "识流运营助手lite",
+    "directories": {
+      "buildResources": "assets",
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "renderer.js",
+      "index.html",
+      "shiflow_logo.png",
+      "assets/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "app_icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "识流运营助手lite",
+      "installerIcon": "app_icon.ico",
+      "uninstallerIcon": "app_icon.ico"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "assets/icon.icns"
+    }
+  }
+}

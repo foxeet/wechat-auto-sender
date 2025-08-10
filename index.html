@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微信自动发送助手</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: transparent;
+            color: #333;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .header-logo {
+            width: 32px;
+            height: 32px;
+            margin-right: 10px;
+            vertical-align: middle;
+            object-fit: contain;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+        }
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .back-btn:hover {
+            background: #e9ecef;
+        }
+        
+        /* 视图切换 */
+        .view {
+            display: none;
+        }
+        .view.active {
+            display: block;
+        }
+        
+        /* 首页 - 任务列表区域 */
+        .homepage-view {
+            padding: 20px;
+        }
+        .task-section {
+            margin-bottom: 30px;
+        }
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .task-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .task-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .task-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        .task-card:hover {
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+        .task-card-header {
+            margin-bottom: 15px;
+        }
+        .task-card-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .task-card-desc {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .task-card-info {
+            color: #999;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+        .task-card-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+        
+        .task-card-actions-left {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .task-card-actions-right {
+            display: flex;
+            gap: 10px;
+            position: relative;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            min-width: 80px;
+            display: none;
+        }
+        
+        .dropdown-menu.show {
+            display: block;
+        }
+        
+        .dropdown-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            color: #333;
+        }
+        
+        .dropdown-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .dropdown-item.delete {
+            color: #dc3545;
+        }
+        
+        .dropdown-item.delete:hover {
+            background: #f8d7da;
+        }
+        
+        .task-card-preview {
+            margin: 15px 0;
+            max-height: 120px;
+            overflow: hidden;
+        }
+        
+        /* 详情页 - 任务编辑区域 */
+        .detail-view {
+            padding: 20px;
+        }
+        .content-section {
+            margin-bottom: 30px;
+        }
+        /* 任务名称编辑区域样式 */
+        .task-name-section {
+            padding: 20px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .task-name-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .task-name-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .task-name-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .task-name-content {
+            min-height: 40px;
+        }
+        .task-name-display {
+            font-size: 16px;
+            color: #333;
+            padding: 8px 0;
+            border-bottom: 2px solid transparent;
+        }
+        .task-name-input {
+            width: 100%;
+            font-size: 16px;
+            border-bottom: 2px solid #0C8CE9;
+        }
+        
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .content-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        .content-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .content-list {
+            margin-bottom: 20px;
+        }
+        .content-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            background: white;
+        }
+        .content-preview {
+            flex: 1;
+            margin-right: 15px;
+        }
+        .content-preview img {
+            max-width: 100px;
+            max-height: 60px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            object-fit: cover;
+        }
+        .content-actions-btns {
+            display: flex;
+            gap: 8px;
+        }
+        
+        /* 执行区域 */
+        .execute-section {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .execute-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .execute-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .execute-info {
+            color: #666;
+            font-size: 14px;
+        }
+        .execute-actions {
+            text-align: center;
+        }
+        
+        /* 日志区域 */
+        .log-section {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .log-header {
+            margin-bottom: 15px;
+        }
+        .log-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .log-content {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .log-info { background: #e3f2fd; }
+        .log-success { background: #e8f5e8; }
+        .log-error { background: #ffebee; }
+        .log-warning { background: #fff3e0; }
+        
+        /* 按钮样式 */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .btn-primary {
+            background: #0C8CE9;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #0a7bd8;
+        }
+        
+        .btn-gradient {
+            background: linear-gradient(135deg, #0C8CE9 0%, #E529C3 100%);
+            color: white;
+        }
+        .btn-gradient:hover {
+            background: linear-gradient(135deg, #0a7bd8 0%, #d424b0 100%);
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #218838;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        .btn-small {
+            padding: 4px 8px;
+            font-size: 12px;
+            min-width: 60px;
+        }
+        
+        .btn-small.expanded {
+            min-width: 80px; /* Expanded by 1/3 from 60px */
+        }
+        .btn-large {
+            padding: 12px 24px;
+            font-size: 16px;
+        }
+        
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 500px;
+        }
+        .modal-header {
+            margin-bottom: 15px;
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .form-textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            resize: both;
+            min-height: 80px;
+            min-width: 300px;
+            font-family: inherit;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .modal-footer {
+            text-align: right;
+        }
+        .modal-footer .btn {
+            margin-left: 10px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 4px;
+            }
+            .task-actions, .content-actions {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .task-list {
+                grid-template-columns: 1fr;
+            }
+            .content-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .content-preview {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            .back-btn {
+                position: static;
+                transform: none;
+                margin-bottom: 15px;
+            }
+        }
+
+        /* Toast 提示样式 */
+        #toast-container {
+            transition: all 0.3s ease-in-out;
+        }
+        
+        #toast-container.show {
+            display: block !important;
+            animation: slideInRight 0.3s ease-in-out;
+        }
+        
+        #toast-container.hide {
+            animation: slideOutRight 0.3s ease-in-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .footer-link {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .footer-link a {
+            color: #999;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .footer-link a:hover {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <button class="back-btn" id="back-btn" style="display: none;">← 返回首页</button>
+            <h1><img src="shiflow_logo.png" alt="识流Logo" class="header-logo">识流运营助手lite</h1>
+        </div>
+        
+        <!-- 首页视图 -->
+        <div class="view homepage-view active" id="homepage-view">
+            <div class="homepage-view">
+                <!-- 任务列表区域 -->
+                <div class="task-section">
+                    <div class="task-header">
+                        <div class="task-title">任务管理</div>
+                        <div class="task-actions">
+                            <button class="btn btn-primary" id="create-task-btn">创建新任务</button>
+                        </div>
+                    </div>
+                    <div class="task-list" id="task-list">
+                        <!-- 任务列表将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+                
+                <!-- 日志区域 -->
+                <div class="log-section">
+                    <div class="log-header">
+                        <div class="log-title">执行日志</div>
+                    </div>
+                    <div class="log-content" id="log-content">
+                        <!-- 日志内容将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 详情页视图 -->
+        <div class="view detail-view" id="detail-view">
+            <div class="detail-view">
+                <!-- 任务名称编辑区域 -->
+                <div class="task-name-section">
+                    <div class="task-name-header">
+                        <div class="task-name-title">任务名称</div>
+                        <div class="task-name-actions">
+                            <button class="btn btn-primary" id="edit-task-name-btn">编辑名称</button>
+                            <button class="btn btn-gradient" id="save-task-name-btn" style="display: none;">保存名称</button>
+                        </div>
+                    </div>
+                    <div class="task-name-content">
+                        <div class="task-name-display" id="task-name-display"></div>
+                        <input type="text" class="form-input task-name-input" id="task-name-edit-input" style="display: none;" placeholder="请输入任务名称">
+                    </div>
+                </div>
+                
+                <!-- 内容编辑区域 -->
+                <div class="content-section">
+                    <div class="content-header">
+                        <div class="content-title">内容编辑</div>
+                        <div class="content-actions">
+                            <button class="btn btn-primary" id="add-text-btn">添加文字</button>
+                            <button class="btn btn-primary" id="add-image-btn">添加图片</button>
+                            <button class="btn btn-gradient" id="save-content-btn">保存内容</button>
+                        </div>
+                    </div>
+                    <div class="content-list" id="content-list">
+                        <!-- 内容列表将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+                
+                <!-- 执行区域 -->
+                <div class="execute-section">
+                    <div class="execute-header">
+                        <div class="execute-title">执行任务</div>
+                        <div class="execute-info">点击执行按钮开始自动发送到微信</div>
+                    </div>
+                    <div class="execute-actions">
+                        <button class="btn btn-gradient btn-large" id="execute-btn">开始执行</button>
+                    </div>
+                </div>
+                
+                <!-- 日志区域 -->
+                <div class="log-section">
+                    <div class="log-header">
+                        <div class="log-title">执行日志</div>
+                    </div>
+                    <div class="log-content" id="log-content-detail">
+                        <!-- 日志内容将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部链接 -->
+        <div class="footer-link">
+            <a href="#" id="footer-link">thiflow.com</a>
+        </div>
+    </div>
+    
+    <!-- 任务创建弹窗 -->
+    <div class="modal" id="task-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">创建新任务</div>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">任务名称</label>
+                    <input type="text" class="form-input" id="task-name-input" placeholder="请输入任务名称">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="create-task-confirm">创建</button>
+                <button class="btn" id="create-task-cancel">取消</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 文字输入弹窗 -->
+    <div class="modal" id="text-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">添加文字内容</div>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">文字内容</label>
+                    <textarea class="form-textarea" id="text-input" placeholder="请输入要发送的文字内容&#10;支持多行输入，按Enter换行&#10;Ctrl+Enter快速提交"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="text-confirm">确定</button>
+                <button class="btn" id="text-cancel">取消</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 图片上传弹窗 -->
+    <div class="modal" id="image-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">添加图片</div>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">选择图片文件</label>
+                    <input type="file" class="form-input" id="image-file-input" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">图片预览</label>
+                    <div id="image-preview-container" style="text-align: center; min-height: 100px; border: 2px dashed #ddd; border-radius: 4px; padding: 20px;">
+                        <div style="color: #999;">请选择图片文件</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="image-confirm">确定</button>
+                <button class="btn" id="image-cancel">取消</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 图片大图预览弹窗 -->
+    <div class="modal" id="image-preview-modal">
+        <div class="modal-content" style="max-width: 80%; max-height: 80%; margin: 5% auto;">
+            <div class="modal-header">
+                <div class="modal-title">图片预览</div>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <img id="large-image-preview" style="max-width: 100%; max-height: 400px; object-fit: contain;">
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="image-preview-close">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 提示组件 -->
+    <div id="toast-container" style="display: none; position: fixed; top: 20px; right: 20px; z-index: 10000;">
+        <div id="toast-message" style="background: #333; color: white; padding: 12px 20px; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); max-width: 300px; word-wrap: break-word;"></div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>

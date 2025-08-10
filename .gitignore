@@ -1,0 +1,30 @@
+# dependencies
+node_modules/
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# build outputs
+dist/
+out/
+build/
+*.log
+*.map
+
+# electron artifacts
+*.asar
+*.exe
+*.dmg
+*.pkg
+*.msi
+*.zip
+*.7z
+
+# env & cache
+.env
+.DS_Store
+Thumbs.db
+
+# editor/OS
+.vscode/
+.idea/
