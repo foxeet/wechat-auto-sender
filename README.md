@@ -8,6 +8,8 @@
 一个基于 Electron 的微信自动发送工具，帮助运营人员提高工作效率。
 ## 直接下载Mac和Win软件
 [识流运营助手lite下载](https://shiflowai.feishu.cn/wiki/SlrnwZVgiilB6ekmSzicFWgDnHf?_kMatchedID=//client/doc/entry&_kUserID=6786546207733858563&from=tab_recent&wiki_version=2#share-Uh5qdXNUWoMJz5xl7hHcnCQKnGg)
+[识流AI运营助手](https://thiflow.com)，高级版，基于视觉模型+LLM大模型，提供AI智能回复全接管，定时任务，特定任务，知识库管理。
+
 ## 🚀 功能特性
 
 - **微信自动化操作**：支持自动发送消息、自动回复等操作
