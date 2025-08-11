@@ -50,8 +50,8 @@ npm run rebuild
 
 ```bash
 # 配置代理（根据您的网络环境调整）
-npm config set proxy http://127.0.0.1:8118
-npm config set https-proxy http://127.0.0.1:8118
+npm config set proxy http://port
+npm config set https-proxy http://port
 
 # 安装依赖
 npm install
