@@ -174,8 +174,8 @@ npm config set https-proxy http://your-proxy:port
 
 ## 📞 联系方式
 shuishan@shiflow.com
-![2e3a77f254f596f1fdc9a296e0c7155c](https://github.com/user-attachments/assets/0658ba7a-db93-41c0-8114-b1a750636120)
-
 ---
 
-⭐ 如果这个项目对您有帮助，请给我们一个 Star！
+⭐ 如果这个项目对您有帮助，请给我们一个 Star！欢迎打赏
+<img width="300" height="300" alt="image" src="https://github.com/user-attachments/assets/1a3da3b7-3ccb-4c7e-9c82-7dfc285c984d" />
+
