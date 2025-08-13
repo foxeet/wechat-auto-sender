@@ -1,0 +1,30 @@
+appId: com.shiflow.operationassistant
+productName: 识流运营助手lite
+directories:
+  buildResources: assets
+  output: dist
+files:
+  - main.js
+  - renderer.js
+  - index.html
+  - shiflow_logo.png
+  - assets/**/*
+  - node_modules/**/*
+  - package.json
+
+mac:
+  target:
+    - target: dmg
+      arch: [x64]
+    - target: zip
+      arch: [x64]
+  icon: assets/app_icon.icns
+  hardenedRuntime: true
+  entitlements: assets/entitlements.mac.plist
+  entitlementsInherit: assets/entitlements.mac.plist
+  gatekeeperAssess: false
+  artifactName: "${productName}-${version}.${ext}"
+  minimumSystemVersion: "10.14.0"
+  compression: maximum
+  notarize:
+    teamId: "JA7ZB6Y4Y6"

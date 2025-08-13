@@ -3,6 +3,175 @@ const { ipcRenderer } = require('electron');
 
 console.log("📝 renderer.js 已经开始执行");
 
+// ------------------- macOS 权限检查（仅在点击执行时使用）-------------------
+// 权限状态缓存
+let permissionStatus = {
+  robot: false,
+  windowManager: false,
+  allGranted: false,
+  lastCheck: 0
+};
+
+async function checkPermissions() {
+    try {
+        const result = await ipcRenderer.invoke('check-permissions');
+        if (result) {
+            permissionStatus = {
+                ...result,
+                lastCheck: Date.now()
+            };
+        }
+        return result || { robot: false, windowManager: false, allGranted: false };
+    } catch (e) {
+        return { robot: false, windowManager: false, allGranted: false };
+    }
+}
+
+// 显示权限状态
+function showPermissionStatus() {
+    const statusText = `权限状态：
+• 辅助功能: ${permissionStatus.robot ? '✅ 已授权' : '❌ 未授权'}
+• 屏幕录制: ${permissionStatus.windowManager ? '✅ 已授权' : '❌ 未授权'}`;
+    
+    addLog(statusText, permissionStatus.allGranted ? 'info' : 'warning');
+}
+
+async function ensurePermissionsOrGuide() {
+    if (process.platform !== 'darwin') return true;
+    
+    // 先显示当前权限状态
+    showPermissionStatus();
+    
+    const perm = await checkPermissions();
+    if (perm.allGranted) {
+        addLog('✅ 所有必要权限已获取，可以正常执行任务', 'success');
+        return true;
+    }
+    
+    addLog('⚠️ 检测到权限不足：需要授予"辅助功能"和"屏幕录制"权限', 'warning');
+    
+    const shouldOpen = confirm(`需要授予系统权限：\n\n1. 辅助功能（必需，用于模拟键盘/鼠标）\n2. 屏幕录制（必需，用于获取窗口信息）\n\n点击"确定"将尝试弹出授权提示，并打开系统设置页面。\n\n授权完成后，请返回应用再次点击执行。`);
+    
+    if (shouldOpen) {
+        // 让主进程尝试触发权限弹窗
+        await ipcRenderer.invoke('prompt-permissions');
+        // 再打开系统设置页
+        await ipcRenderer.invoke('open-system-preferences');
+        addLog('已尝试触发权限弹窗并打开系统设置，请授权后返回应用再次点击执行', 'info');
+        
+        // 提示用户刷新权限状态
+        setTimeout(() => {
+            const shouldRefresh = confirm('如果您已经在系统设置中完成了权限授权，请点击"确定"刷新权限状态。');
+            if (shouldRefresh) {
+                refreshPermissions();
+            }
+        }, 2000);
+    }
+    return false;
+}
+
+// 刷新权限状态
+async function refreshPermissions() {
+    try {
+        addLog('正在刷新权限状态...', 'info');
+        const result = await ipcRenderer.invoke('refresh-permissions');
+        if (result) {
+            permissionStatus = {
+                ...result,
+                lastCheck: Date.now()
+            };
+            showPermissionStatus();
+            
+            if (result.allGranted) {
+                addLog('✅ 权限状态已刷新，所有必要权限已获取！', 'success');
+                showToast('权限获取成功！现在可以执行任务了', 3000);
+            } else {
+                addLog('⚠️ 权限状态已刷新，仍有权限未获取', 'warning');
+            }
+        }
+    } catch (error) {
+        addLog('刷新权限状态失败：' + error.message, 'error');
+    }
+}
+
+// 统一的执行任务函数
+async function executeTaskCommon() {
+    if (!currentTask || !currentTask.items || currentTask.items.length === 0) {
+        addLog('当前任务没有内容，无法执行', 'warning');
+        return;
+    }
+    
+    // macOS 下在执行前进行权限检查
+    const ok = await ensurePermissionsOrGuide();
+    if (!ok) return;
+    
+    addLog(`开始执行任务: ${currentTask.name}`, 'info');
+    addLog(`共 ${currentTask.items.length} 条内容`, 'info');
+    
+    // 显示toast提示
+    showToast('请点击输入框，3秒后会自动发送信息', 3000);
+    
+    // 显示倒计时提示
+    addLog('请鼠标点击输入框，任务即将开始执行...', 'warning');
+    
+    const executeBtn = document.getElementById('execute-btn');
+    if (executeBtn) {
+        executeBtn.disabled = true;
+        executeBtn.textContent = '执行中...';
+    }
+    
+    try {
+        for (let i = 0; i < currentTask.items.length; i++) {
+            const item = currentTask.items[i];
+            
+            if (i === 0) {
+                // 第一条内容：显示动态倒计时
+                addLog(`正在发送第 ${i + 1} 条（共 ${currentTask.items.length} 条），请勿切换窗口...`, 'info');
+                
+                // 动态倒计时显示
+                for (let countdown = 3; countdown > 0; countdown--) {
+                    addLog(`${countdown}秒后开始执行...`, 'info');
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            } else {
+                // 后续内容：快速执行，不用等太久
+                addLog(`正在发送第 ${i + 1} 条（共 ${currentTask.items.length} 条），请勿切换窗口...`, 'info');
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            try {
+                const result = await ipcRenderer.invoke('send-item', item);
+                if (result.success) {
+                    addLog(`第 ${i + 1} 条发送成功`, 'success');
+                } else {
+                    addLog(`第 ${i + 1} 条发送失败：${result.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`第 ${i + 1} 条发送失败：${error.message}`, 'error');
+            }
+        }
+    } catch (error) {
+        addLog(`执行过程中出现错误：${error.message}`, 'error');
+    }
+    
+    addLog('所有内容都已发送完毕。若需重新执行，请点击"开始执行"。', 'success');
+    
+    if (executeBtn) {
+        executeBtn.disabled = false;
+        executeBtn.textContent = '开始执行';
+    }
+}
+
+// 从首页执行任务
+async function executeTaskFromHomepage() {
+    await executeTaskCommon();
+}
+
+// 执行任务（详情页）
+async function executeTask() {
+    await executeTaskCommon();
+}
+
 // 存储键
 const TASKS_STORAGE_KEY = "wechat_auto_send_tasks";
 const CURRENT_TASK_KEY = "wechat_auto_send_current_task";
@@ -551,70 +720,6 @@ function renderTaskList() {
     });
 }
 
-// 从首页执行任务
-async function executeTaskFromHomepage() {
-    if (!currentTask || !currentTask.items || !currentTask.items.length === 0) {
-        addLog('当前任务没有内容，无法执行', 'warning');
-        return;
-    }
-    
-    addLog(`开始执行任务: ${currentTask.name}`, 'info');
-    addLog(`共 ${currentTask.items.length} 条内容`, 'info');
-    
-    // 显示toast提示
-    showToast('请点击输入框，3秒后会自动发送信息', 3000);
-    
-    // 显示倒计时提示
-    addLog('请鼠标点击输入框，任务即将开始执行...', 'warning');
-    
-    const executeBtn = document.getElementById('execute-btn');
-    executeBtn.disabled = true;
-    executeBtn.textContent = '执行中...';
-    
-    try {
-        for (let i = 0; i < currentTask.items.length; i++) {
-            const item = currentTask.items[i];
-            
-            if (i === 0) {
-                // 第一条内容：显示动态倒计时
-                addLog(`正在发送第 ${i + 1} 条（共 ${currentTask.items.length} 条），请勿切换窗口...`, 'info');
-                
-                // 动态倒计时显示
-                for (let countdown = 3; countdown > 0; countdown--) {
-                    addLog(`${countdown}秒后开始执行...`, 'info');
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                }
-            } else {
-                // 后续内容：快速执行，不用等太久
-                addLog(`正在发送第 ${i + 1} 条（共 ${currentTask.items.length} 条），请勿切换窗口...`, 'info');
-                // 只等待0.5秒
-                await new Promise(resolve => setTimeout(resolve, 500));
-            }
-            
-            // 添加详细的调试日志
-            console.log(`🔍 调试 - 准备发送第 ${i + 1} 条内容:`, item);
-            console.log(`🔍 调试 - 内容类型:`, item.type);
-            console.log(`🔍 调试 - 内容内容:`, item.content);
-            console.log(`🔍 调试 - 内容长度:`, item.content ? item.content.length : 'undefined');
-            
-            try {
-                const result = await ipcRenderer.invoke('send-item', item);
-                console.log(`🔍 调试 - IPC调用结果:`, result);
-                addLog(`第 ${i + 1} 条发送成功`, 'success');
-            } catch (error) {
-                console.log(`🔍 调试 - IPC调用失败:`, error);
-                addLog(`第 ${i + 1} 条发送失败：${error.message}`, 'error');
-            }
-        }
-    } catch (error) {
-        addLog(`执行过程中出现错误：${error.message}`, 'error');
-    }
-    
-    addLog('所有内容都已发送完毕。若需重新执行，请点击"开始执行"。', 'success');
-    executeBtn.disabled = false;
-    executeBtn.textContent = '开始执行';
-}
-
 // 选择任务
 function selectTask(index) {
     if (index >= 0 && index < tasks.length) {
@@ -836,70 +941,6 @@ function saveContent() {
     showToast('内容保存成功！', 2000);
 }
 
-// 执行任务（详情页）
-async function executeTask() {
-    if (!currentTask || !currentTask.items || !currentTask.items.length === 0) {
-        addLog('当前任务没有内容，无法执行', 'warning');
-        return;
-    }
-    
-    addLog(`开始执行任务: ${currentTask.name}`, 'info');
-    addLog(`共 ${currentTask.items.length} 条内容`, 'info');
-    
-    // 显示toast提示
-    showToast('请点击输入框，3秒后会自动发送信息', 3000);
-    
-    // 显示倒计时提示
-    addLog('请鼠标点击输入框，任务即将开始执行...', 'warning');
-    
-    const executeBtn = document.getElementById('execute-btn');
-    executeBtn.disabled = true;
-    executeBtn.textContent = '执行中...';
-    
-    try {
-        for (let i = 0; i < currentTask.items.length; i++) {
-            const item = currentTask.items[i];
-            
-            if (i === 0) {
-                // 第一条内容：显示动态倒计时
-                addLog(`正在发送第 ${i + 1} 条（共 ${currentTask.items.length} 条），请勿切换窗口...`, 'info');
-                
-                // 动态倒计时显示
-                for (let countdown = 3; countdown > 0; countdown--) {
-                    addLog(`${countdown}秒后开始执行...`, 'info');
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                }
-            } else {
-                // 后续内容：快速执行，不用等太久
-                addLog(`正在发送第 ${i + 1} 条（共 ${currentTask.items.length} 条），请勿切换窗口...`, 'info');
-                // 只等待0.5秒
-                await new Promise(resolve => setTimeout(resolve, 500));
-            }
-            
-            // 添加详细的调试日志
-            console.log(`🔍 调试 - 准备发送第 ${i + 1} 条内容:`, item);
-            console.log(`🔍 调试 - 内容类型:`, item.type);
-            console.log(`🔍 调试 - 内容内容:`, item.content);
-            console.log(`🔍 调试 - 内容长度:`, item.content ? item.content.length : 'undefined');
-            
-            try {
-                const result = await ipcRenderer.invoke('send-item', item);
-                console.log(`🔍 调试 - IPC调用结果:`, result);
-                addLog(`第 ${i + 1} 条发送成功`, 'success');
-            } catch (error) {
-                console.log(`🔍 调试 - IPC调用失败:`, error);
-                addLog(`第 ${i + 1} 条发送失败：${error.message}`, 'error');
-            }
-        }
-    } catch (error) {
-        addLog(`执行过程中出现错误：${error.message}`, 'error');
-    }
-    
-    addLog('所有内容都已发送完毕。若需重新执行，请点击"开始执行"。', 'success');
-    executeBtn.disabled = false;
-    executeBtn.textContent = '开始执行';
-}
-
 // 显示文字编辑弹窗
 function showTextEditDialog(currentContent, callback) {
     const dialog = document.createElement('div');
@@ -1035,7 +1076,17 @@ window.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('save-content-btn').addEventListener('click', saveContent);
     
+    // 执行按钮事件监听器
     document.getElementById('execute-btn').addEventListener('click', executeTask);
+    
+    // 权限检查按钮事件监听器
+    const checkPermissionsBtn = document.getElementById('check-permissions-btn');
+    if (checkPermissionsBtn) {
+        checkPermissionsBtn.addEventListener('click', async () => {
+            addLog('正在检查系统权限状态...', 'info');
+            await refreshPermissions();
+        });
+    }
     
     // 任务创建弹窗事件
     document.getElementById('create-task-confirm').addEventListener('click', createNewTask);

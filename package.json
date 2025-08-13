@@ -1,22 +1,31 @@
 {
   "name": "wechat-auto-sender",
   "version": "1.0.0",
+  "description": "WeChat Auto Sender - 自动发送微信消息工具",
+  "author": "Shiflow Team",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "rebuild": "electron-rebuild -f -w robotjs,node-window-manager",
+    "rebuild:intel": "npm_config_arch=x64 npm run rebuild",
     "dist": "electron-builder",
     "dist:win": "electron-builder --win",
     "dist:mac": "electron-builder --mac",
+    "dist:mac:intel": "npm_config_arch=x64 electron-builder --mac --x64",
+    "dist:mac:intel:config": "npm_config_arch=x64 electron-builder --config electron-builder-intel.yml",
+    "dist:mac:arm64": "npm_config_arch=arm64 electron-builder --mac --arm64",
+    "dist:mac:arm64:config": "npm_config_arch=arm64 electron-builder --config electron-builder-arm64.yml",
+    "dist:mac:universal": "electron-builder --mac --universal",
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
     "node-window-manager": "^2.2.4",
-    "robotjs": "^0.6.0"
+    "robotjs": "^0.6.0",
+    "node-mac-permissions": "^1.3.0"
   },
   "devDependencies": {
     "electron": "24.8.8",
-    "electron-builder": "^23.6.0",
+    "electron-builder": "^24.9.1",
     "@electron/rebuild": "^4.0.1"
   },
   "build": {
@@ -42,7 +51,7 @@
           "arch": ["x64"]
         }
       ],
-      "icon": "app_icon.ico"
+      "icon": "assets/app_icon.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -50,15 +59,31 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "识流运营助手lite",
-      "installerIcon": "app_icon.ico",
-      "uninstallerIcon": "app_icon.ico"
+      "installerIcon": "assets/app_icon.ico",
+      "uninstallerIcon": "assets/app_icon.ico"
     },
     "mac": {
       "target": [
-        "dmg",
-        "zip"
+        {
+          "target": "dmg",
+          "arch": ["x64"]
+        },
+        {
+          "target": "zip", 
+          "arch": ["x64"]
+        }
       ],
-      "icon": "assets/icon.icns"
+      "icon": "assets/app_icon.icns",
+      "hardenedRuntime": true,
+      "entitlements": "assets/entitlements.mac.plist",
+      "entitlementsInherit": "assets/entitlements.mac.plist",
+      "gatekeeperAssess": false,
+      "artifactName": "${productName}-${version}.${ext}",
+      "minimumSystemVersion": "10.14.0",
+      "notarize": {
+        "tool": "notarytool",
+        "keychainProfile": "notary-shiflow"
+      }
     }
   }
 }
