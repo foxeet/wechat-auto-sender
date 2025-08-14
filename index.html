@@ -46,17 +46,21 @@
             left: 20px;
             top: 50%;
             transform: translateY(-50%);
-            background: #f8f9fa;
-            border: 1px solid #ddd;
+            background: white;
+            border: 1px solid #e0e0e0;
             color: #333;
             padding: 8px 16px;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         .back-btn:hover {
-            background: #e9ecef;
+            background: #f8f9fa;
+            border-color: #d0d0d0;
+            transform: translateY(-50%) translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
         }
         
         /* 视图切换 */
@@ -97,14 +101,14 @@
         }
         .task-card {
             background: white;
-            border: 1px solid #ddd;
+            border: none;
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
         }
         .task-card:hover {
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
             transform: translateY(-2px);
         }
         .task-card-header {
@@ -149,9 +153,9 @@
             top: 100%;
             right: 0;
             background: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
             z-index: 1000;
             min-width: 80px;
             display: none;
@@ -169,6 +173,7 @@
             width: 100%;
             text-align: left;
             color: #333;
+            transition: background-color 0.2s ease;
         }
         
         .dropdown-item:hover {
@@ -187,6 +192,7 @@
             margin: 15px 0;
             max-height: 120px;
             overflow: hidden;
+            border-radius: 6px;
         }
         
         /* 详情页 - 任务编辑区域 */
@@ -200,9 +206,10 @@
         .task-name-section {
             padding: 20px;
             background: white;
-            border: 1px solid #ddd;
+            border: none;
             border-radius: 8px;
             margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         .task-name-header {
             display: flex;
@@ -231,7 +238,15 @@
         .task-name-input {
             width: 100%;
             font-size: 16px;
+            border: none;
             border-bottom: 2px solid #0C8CE9;
+            padding: 8px 0;
+            background: transparent;
+            transition: border-color 0.3s ease;
+        }
+        .task-name-input:focus {
+            outline: none;
+            border-bottom-color: #0056b3;
         }
         
         .content-header {
@@ -256,10 +271,11 @@
             display: flex;
             align-items: center;
             padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            border: none;
+            border-radius: 8px;
             margin-bottom: 10px;
             background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         .content-preview {
             flex: 1;
@@ -268,9 +284,15 @@
         .content-preview img {
             max-width: 100px;
             max-height: 60px;
-            border-radius: 4px;
-            border: 1px solid #ddd;
+            border-radius: 6px;
+            border: none;
             object-fit: cover;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .content-preview img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
         }
         .content-actions-btns {
             display: flex;
@@ -319,14 +341,15 @@
         }
         .log-content {
             background: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            border: none;
+            border-radius: 8px;
             padding: 15px;
             max-height: 200px;
             overflow-y: auto;
             font-family: monospace;
             font-size: 12px;
             line-height: 1.4;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         .log-entry {
             margin-bottom: 8px;
@@ -341,60 +364,79 @@
         /* 按钮样式 */
         .btn {
             padding: 8px 16px;
-            border: 1px solid rgb(221, 221, 221);
-            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
-            transition: background-color 0.3s;
-            background: rgb(248, 249, 250);
-            color: rgb(102, 102, 102);
+            transition: all 0.3s ease;
+            background: #ffffff;
+            color: #333;
+            font-weight: 500;
+        }
+        .btn:hover {
+            background: #f8f9fa;
+            border-color: #d0d0d0;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .btn-primary {
-            background: rgb(248, 249, 250);
-            color: rgb(102, 102, 102);
-            border: 1px solid rgb(221, 221, 221);
+            background: #0C8CE9;
+            color: white;
+            border: 1px solid #0C8CE9;
         }
         .btn-primary:hover {
-            background: rgb(233, 236, 239);
-        }
-        
-        .btn:hover {
-            background: rgb(233, 236, 239);
+            background: #0056b3;
+            border-color: #0056b3;
         }
         
         .btn-gradient {
-            background: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            border: none;
         }
         .btn-gradient:hover {
-            background: #555;
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
         .btn-success {
             background: #28a745;
             color: white;
+            border: 1px solid #28a745;
         }
         .btn-success:hover {
             background: #218838;
+            border-color: #218838;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
         }
         .btn-danger {
-            background: rgb(248, 249, 250);
-            color: rgb(102, 102, 102);
-            border: 1px solid rgb(221, 221, 221);
+            background: #dc3545;
+            color: white;
+            border: 1px solid #dc3545;
         }
         .btn-danger:hover {
-            background: rgb(233, 236, 239);
+            background: #c82333;
+            border-color: #c82333;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
         }
         .btn-warning {
             background: #ffc107;
             color: #212529;
+            border: 1px solid #ffc107;
         }
         .btn-warning:hover {
             background: #e0a800;
+            border-color: #e0a800;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
         }
         .btn-small {
             padding: 4px 8px;
             font-size: 12px;
             min-width: 60px;
+            border-radius: 4px;
         }
         
         .btn-small.expanded {
@@ -403,6 +445,7 @@
         .btn-large {
             padding: 12px 24px;
             font-size: 16px;
+            border-radius: 8px;
         }
         
         /* 弹窗样式 */
@@ -423,6 +466,8 @@
             border-radius: 8px;
             width: 80%;
             max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border: none;
         }
         .modal-header {
             margin-bottom: 15px;
@@ -449,18 +494,24 @@
             width: 80%;
             max-width: 300px;
             padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
             font-size: 14px;
             margin: 0 auto;
             display: block;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #0C8CE9;
+            box-shadow: 0 0 0 3px rgba(12, 140, 233, 0.1);
         }
         .form-textarea {
             width: 80%;
             max-width: 400px;
             padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
             font-size: 14px;
             resize: both;
             min-height: 80px;
@@ -471,6 +522,12 @@
             word-wrap: break-word;
             margin: 0 auto;
             display: block;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .form-textarea:focus {
+            outline: none;
+            border-color: #0C8CE9;
+            box-shadow: 0 0 0 3px rgba(12, 140, 233, 0.1);
         }
         .modal-footer {
             text-align: right;
@@ -521,6 +578,11 @@
             animation: fadeOutDown 0.4s ease-in;
         }
         
+        #toast-message {
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -554,10 +616,11 @@
             color: #999;
             text-decoration: none;
             font-size: 14px;
+            transition: color 0.3s ease;
         }
         
         .footer-link a:hover {
-            color: #666;
+            color: #0C8CE9;
         }
     </style>
 </head>
@@ -696,7 +759,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">图片预览</label>
-                    <div id="image-preview-container" style="text-align: center; min-height: 100px; border: 2px dashed #ddd; border-radius: 4px; padding: 20px;">
+                    <div id="image-preview-container" style="text-align: center; min-height: 100px; border: 2px dashed #e0e0e0; border-radius: 8px; padding: 20px; background: #fafafa;">
                         <div style="color: #999;">请选择图片文件</div>
                     </div>
                 </div>
@@ -715,10 +778,10 @@
                 <div class="modal-title">图片预览</div>
             </div>
             <div class="modal-body" style="text-align: center;">
-                <img id="large-image-preview" style="max-width: 100%; max-height: 400px; object-fit: contain;">
+                <img id="large-image-preview" style="max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.15);">
             </div>
             <div class="modal-footer">
-                <button class="btn" id="image-preview-close">关闭</button>
+                <button class="btn btn-primary" id="image-preview-close">关闭</button>
             </div>
         </div>
     </div>
