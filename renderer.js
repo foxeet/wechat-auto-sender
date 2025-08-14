@@ -85,6 +85,11 @@ function addLog(message, type = 'info') {
         logContentDetail.scrollTop = logContentDetail.scrollHeight;
     }
     
+    // 在执行任务时，同时以Toast形式显示重要日志
+    if (type === 'success' || type === 'error' || type === 'warning') {
+        showToast(message, 4000);
+    }
+    
     console.log(`📝 [${type.toUpperCase()}] ${message}`);
 }
 
