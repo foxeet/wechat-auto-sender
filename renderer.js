@@ -265,8 +265,8 @@ function showImageFileDialog(callback) {
         margin-bottom: 15px;
         color: #333;
     `;
-    title.textContent = '选择图片文件';
-    
+        title.textContent = '选择图片文件';
+
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.accept = 'image/*';
@@ -291,18 +291,18 @@ function showImageFileDialog(callback) {
         color: #999;
     `;
     previewContainer.textContent = '请选择图片文件';
-    
+
     const buttonContainer = document.createElement('div');
     buttonContainer.style.cssText = `
         display: flex;
         gap: 10px;
         justify-content: flex-end;
     `;
-    
+
     const confirmBtn = document.createElement('button');
     confirmBtn.style.cssText = `
         padding: 8px 16px;
-        background: #667eea;
+        background: #000000;
         color: white;
         border: none;
         border-radius: 4px;
@@ -376,8 +376,8 @@ function showImageFileDialog(callback) {
     confirmBtn.addEventListener('click', handleConfirm);
     cancelBtn.addEventListener('click', handleCancel);
     
-    buttonContainer.appendChild(cancelBtn);
     buttonContainer.appendChild(confirmBtn);
+    buttonContainer.appendChild(cancelBtn);
     
     content.appendChild(title);
     content.appendChild(fileInput);
@@ -1000,14 +1000,14 @@ function showTextEditDialog(currentContent, callback) {
 
     confirmBtn.addEventListener('click', handleConfirm);
     cancelBtn.addEventListener('click', handleCancel);
-    textInput.addEventListener('keypress', (e) => {
+    textInput.addEventListener('click', (e) => {
         if (e.key === 'Enter') {
             handleConfirm();
         }
     });
 
-    buttonContainer.appendChild(cancelBtn);
     buttonContainer.appendChild(confirmBtn);
+    buttonContainer.appendChild(cancelBtn);
 
     content.appendChild(title);
     content.appendChild(textInput);
