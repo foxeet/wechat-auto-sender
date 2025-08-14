@@ -964,7 +964,7 @@ function showTextEditDialog(currentContent, callback) {
     const confirmBtn = document.createElement('button');
     confirmBtn.style.cssText = `
         padding: 8px 16px;
-        background: #667eea;
+        background: #000000;
         color: white;
         border: none;
         border-radius: 4px;
